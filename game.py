@@ -1,5 +1,4 @@
-# game.py
-# Core mechanics (intro, status, questions, badges)
+
 
 from GamifiedLearning.player import Player
 from GamifiedLearning.levels import init_levels
