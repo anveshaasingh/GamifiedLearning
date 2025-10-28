@@ -1,10 +1,6 @@
-# player.py
-# Player data + save/load
 
 import json
 import os
-
-SAVE_FILE = "player_save.json"
 
 class Player:
     def __init__(self, name="Player", lives=3, current_level=0, badges=None):
@@ -22,6 +18,7 @@ class Player:
         }
         with open(SAVE_FILE, "w") as f:
             json.dump(data, f)
+        print("Progress saved successfully!")
 
     @staticmethod
     def load():
