@@ -1,16 +1,20 @@
 from player import Player
 from levels import init_levels
+from leaderboard import get_top_players
+
 
 def show_intro():
     print("=" * 45)
-    print("     QUIZ ADVENTURE: Learn by Playing")
+    print("     GAMIFIED LEARNING: A QUESTION-DRIVEN EXPLORATION EXPERIENCE")
     print("=" * 45)
     print("Answer questions to clear levels and earn badges!")
     print("Each wrong answer loses one life (3 total).\n")
 
+
 def show_status(player, total_levels):
     print(f"\nPlayer: {player.name} | Level {player.current_level+1}/{total_levels} | Lives: {player.lives}")
     print("Badges:", player.badges if player.badges else "none")
+
 
 def ask_question(question, player):
     while True:
@@ -39,11 +43,13 @@ def ask_question(question, player):
 
         return choice == question["answer"]
 
+
 def award_badge(player, level_index):
     badge = f"Badge-{level_index+1}"
     if badge not in player.badges:
         player.badges.append(badge)
         print(f"\n*** Achievement Unlocked: {badge}! ***")
+
 
 def run_game():
     levels = init_levels()
@@ -51,13 +57,19 @@ def run_game():
 
     choice = input("Load previous progress? (y/n): ").strip().lower()
     if choice == "y":
-        player = Player.load()
+        name = input("Enter your name: ").strip()
+        player = Player.load(name)
         if player:
-            print(f"Welcome back, {player.name}!")
+            if player.lives <= 0:  # reset lives if player was dead
+                player.lives = 3
+            print(f"Welcome back, {player.name}! Resuming your progress...")
         else:
-            player = Player(name=input("Enter your name: ").strip())
+            print("No saved data found. Starting a new game.")
+            player = Player(name=name)
     else:
-        player = Player(name=input("Enter your name: ").strip())
+        name = input("Enter your name: ").strip()
+        player = Player(name=name)
+
 
     show_intro()
 
@@ -71,6 +83,7 @@ def run_game():
         if ask_question(level["question"], player):
             print("Correct!\n")
             award_badge(player, player.current_level)
+            player.score += 10
             player.current_level += 1
             player.save()
         else:
@@ -80,13 +93,22 @@ def run_game():
                 print("*** Game Over! ***")
                 break
 
+    # After the game ends
     if player.current_level >= len(levels):
-        print(f"\n*** Congratulations {player.name}, you finished all levels! ***")
-        print("Your badges:", player.badges)
+        print(f"\n🎉 Congratulations {player.name}, you finished all levels! 🎉")
+    else:
+        print("💀 Game Over!")
+
+    print(f"Score: {getattr(player, 'score', player.current_level * 10)}, Badges: {player.badges}")
     player.save()
 
+    # Show leaderboard
+    print("\n🏆 Leaderboard:")
+    for i, (name, score) in enumerate(get_top_players(), start=1):
+        print(f"{i}. {name} - {score} points")
+
+
+# This line must be OUTSIDE all functions (at the end)
 if __name__ == "__main__":
     run_game()
-
-
 
